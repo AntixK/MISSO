@@ -1,8 +1,9 @@
+import os
 import numpy as np
-import threading
 from graphviz import Graph
-from typing import Optional, List
 import matplotlib.pyplot as plt
+from typing import Optional, List
+
 from .lsmi import lsmi1D
 
 class MISSO:
@@ -52,6 +53,7 @@ class MISSO:
                 MIM[j,i] = smi # MI is symmetric
 
         return MIM
+
     def show_graph(self, M:np.ndarray, threshold:float, node_labels:List, title:str) -> None:
 
         g = Graph('G', filename=title+'.gv', engine='dot')
@@ -82,32 +84,35 @@ class MISSO:
         plt.show()
 
 
-# if __name__ == '__main__':
-#     import matplotlib.pyplot as plt
-#     # plt.style.use('ggplot')
-#     np.set_printoptions(precision=2)
-#     t = np.random.uniform(-10, 10, (100, 1))
-#     #
-#     y = np.sin(t/10 * np.pi)
-#     X = y
-#
-#     y = np.cos(t / 10 * np.pi)
-#     X = np.hstack([X, y])
-#     y = np.random.uniform(-1, 1, (100, 1))
-#     X = np.hstack([X, y])
-#     y = np.sin(t/10 * np.pi + 2 * np.pi / 3.)
-#     X = np.hstack([X, y])
-#     y = np.cos(t / 10 * np.pi - 2 * np.pi / 3.)
-#     X = np.hstack([X, y])
-#
-#     y = np.vstack([-np.ones((50, 1)), np.ones((50, 1))])
-#     X = np.hstack([X, y])
-#
-#     print(X.shape)
-#
-#     g = MISSO()
-#     m = g.fit(X)
-#     print(m)
+if __name__ == '__main__':
+    import matplotlib.pyplot as plt
+    from time import time
+    # plt.style.use('ggplot')
+    np.set_printoptions(precision=2)
+    t = np.random.uniform(-10, 10, (100, 1))
+    #
+    y = np.sin(t/10 * np.pi)
+    X = y
+
+    y = np.cos(t / 10 * np.pi)
+    X = np.hstack([X, y])
+    y = np.random.uniform(-1, 1, (100, 1))
+    X = np.hstack([X, y])
+    y = np.sin(t/10 * np.pi + 2 * np.pi / 3.)
+    X = np.hstack([X, y])
+    y = np.cos(t / 10 * np.pi - 2 * np.pi / 3.)
+    X = np.hstack([X, y])
+
+    y = np.vstack([-np.ones((50, 1)), np.ones((50, 1))])
+    X = np.hstack([X, y])
+
+    print(X.shape)
+
+    g = MISSO()
+    s = time()
+    m = g.fit(X)
+    print(f"Elapsed time: {time() - s}")
+    # print(m)
 #
 #     g.show_matrix(m, xlabels = [r'$sin(\pi t/10)$',
 #                                  r'$Cos(\pi t/10)$',

@@ -5,7 +5,8 @@ def lsmi1D(X:np.ndarray,
            Y:Optional[np.ndarray] = None,
            num_centers:Optional[int] = 200,
            rbf_sigma:Optional[float] = None,
-           alpha: Optional[float] = None) -> Tuple:
+           alpha: Optional[float] = None,
+           random_seed:int = 42) -> Tuple:
     """
     Compute the LSMI estimate of the Mutualk information between two 1Dcrandom variables
     X and Y, each with M samples.
@@ -16,6 +17,8 @@ def lsmi1D(X:np.ndarray,
     :param alpha: L2 regularizer for the LSMI estimator
     :return: A tuple of LSMI estimate and the cross validation score
     """
+
+    np.random.seed(random_seed)
     if Y is None:
         Y = X
 
