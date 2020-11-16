@@ -1,4 +1,5 @@
 import os
+import ctypes
 import numpy as np
 from graphviz import Graph
 import matplotlib.pyplot as plt
@@ -12,7 +13,7 @@ import multiprocessing
 from multiprocessing import Pool
 from multiprocessing import sharedctypes
 
-from .lsmi import lsmi1D
+from lsmi import lsmi1D
 
 class MISSO:
     def __init__(self,
@@ -111,8 +112,11 @@ class MISSO:
                         for i in range(N) for j in range(i + 1)]
 
         if self.use_mp: # Multiprocessing Code
-            MIM = np.ctypeslib.as_ctypes(np.zeros((N, N)))
-            shared_MIM = sharedctypes.RawArray(MIM._type_, MIM)
+            MIM = multiprocessing.Array(ctypes.c_double, N*N, lock=False)
+            shared_MIM = np.ctypeslib.as_array(MIM)
+            shared_MIM = shared_MIM.reshape(N,N)
+            # MIM = np.ctypeslib.as_ctypes(np.zeros((N, N)))
+            # shared_MIM = sharedctypes.Array(MIM._type_, MIM, lock=False)
 
             with closing(Pool(processes=os.cpu_count(),
                               initializer=init_shared_data,
@@ -187,14 +191,14 @@ if __name__ == '__main__':
     # plt.style.use('ggplot')
 
     np.set_printoptions(precision=2)
-    t = np.random.uniform(-10, 10, (100, 1))
+    t = np.random.uniform(-10, 10, (50, 1))
     #
     y = np.sin(t/10 * np.pi)
     X = y
 
     y = np.cos(t / 10 * np.pi)
     X = np.hstack([X, y])
-    y = np.random.uniform(-1, 1, (100, 1))
+    y = np.random.uniform(-1, 1, (50, 1))
     X = np.hstack([X, y])
     y = np.sin(t/10 * np.pi + 2 * np.pi / 3.)
     X = np.hstack([X, y])

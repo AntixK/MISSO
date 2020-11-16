@@ -59,31 +59,17 @@ class MISSO:
         self.random_seed = random_seed
 
     def compute_smi(self, *args):
-
+        mim, x, y, i, j = args
         if self.verbose:
             self.info(f"Computing SMI for [{i}, {j}]")
 
-        if self.use_mp:
-            mim, x, y, i, j = args
-            # Get the local instance of the shared memory
-            # Note that we don't need lock here as the
-            # parts accessed by each process are independent
-            smi, _ = lsmi1D(x, y,
-                            num_centers=self.num_centers,
-                            rbf_sigma=self.rbf_sigma,
-                            alpha=self.alpha,
-                            random_seed = self.random_seed)
-            mim[i, j] = smi
-            mim[j, i] = smi
-        else:
-            x, y, i, j = args
-            smi, _ = lsmi1D(x, y,
-                            num_centers=self.num_centers,
-                            rbf_sigma=self.rbf_sigma,
-                            alpha=self.alpha,
-                            random_seed = self.random_seed)
-            self.MIM[i, j] = smi
-            self.MIM[j, i] = smi  # MI is symmetric
+        smi, _ = lsmi1D(x, y,
+                        num_centers=self.num_centers,
+                        rbf_sigma=self.rbf_sigma,
+                        alpha=self.alpha,
+                        random_seed = self.random_seed)
+        mim[i, j] = smi
+        mim[j, i] = smi
 
         if self.verbose:
             self.info(f"Finished SMI for [{i}, {i}]")
@@ -136,7 +122,7 @@ class MISSO:
                 pbar = tqdm(process_args, desc = 'Computing MIM')
 
             for args in pbar:
-                self.compute_smi(*args)
+                self.compute_smi(self.MIM, *args)
 
         return self.MIM
 
@@ -169,17 +155,6 @@ class MISSO:
         plt.grid(False)
         plt.show()
 
-def init_shared_data(shared_array):
-    """
-    Multiprocessing requires the shared memory to be
-    inherited and not passed. This is the simplest and most
-    elegant way I could come up with.
-
-    :param shared_array: The array to be shared across the processes
-    :return: A global instance of the array
-    """
-    global shared_MIM
-    shared_MIM = shared_array
 
 if __name__ == '__main__':
     # import matplotlib.pyplot as plt
