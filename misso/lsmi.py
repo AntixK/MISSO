@@ -8,7 +8,7 @@ def lsmi1D(X:np.ndarray,
            alpha: Optional[float] = None,
            random_seed:int = 42) -> Tuple:
     """
-    Compute the LSMI estimate of the Mutualk information between two 1Dcrandom variables
+    Compute the LSMI estimate of the Mutualk information between two 1D random variables
     X and Y, each with M samples.
     :param X: [M, 1] Vector of samples
     :param Y: [M, 1] Vector of samples
