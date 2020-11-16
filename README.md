@@ -15,8 +15,8 @@ MISSO
 - [ ] Try gradient-based solvers 
     - [ ] Conjugate-gradient descent
 - [x] Multi-processing for `lsmi` computation
-    - [ ] Reduce interprocess overhead
-    - [ ] Try other methods to parallelize the code
+    - [x] Reduce interprocess overhead
+    - [x] Try other methods to parallelize the code
 - [ ] Benchmarks
     - [ ] Multiprocessing
     - [ ] GPU benchmarks
