@@ -12,7 +12,7 @@ import multiprocessing
 from multiprocessing import Pool
 from multiprocessing import sharedctypes
 
-from .lsmi import lsmi1D
+from lsmi import lsmi1D
 
 class MISSO:
     def __init__(self,
@@ -71,7 +71,8 @@ class MISSO:
                             num_centers=self.num_centers,
                             rbf_sigma=self.rbf_sigma,
                             alpha=self.alpha,
-                            random_seed = self.random_seed)
+                            random_seed = self.random_seed,
+                            verbose=self.verbose)
             local_mim[i, j] = smi
             local_mim[j, i] = smi
         else:
@@ -79,7 +80,8 @@ class MISSO:
                             num_centers=self.num_centers,
                             rbf_sigma=self.rbf_sigma,
                             alpha=self.alpha,
-                            random_seed = self.random_seed)
+                            random_seed = self.random_seed,
+                            verbose=self.verbose)
             self.MIM[i, j] = smi
             self.MIM[j, i] = smi  # MI is symmetric
 
@@ -232,7 +234,8 @@ if __name__ == '__main__':
     # print(f"Elapsed time: {time() - s}")
 
 
-    g = MISSO(verbose=False, mp=True)
+    # g = MISSO(verbose=True, mp=False)
+    g = MISSO(verbose=True, mp=True)
     s = time()
     m_p = g.fit(X)
     print(f"Elapsed time: {time() - s}")
