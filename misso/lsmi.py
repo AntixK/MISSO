@@ -16,6 +16,10 @@ def lsmi1D(X:np.ndarray,
     :param rbf_sigma: Length-scale parameters for the RBF kernel
     :param alpha: L2 regularizer for the LSMI estimator
     :return: A tuple of LSMI estimate and the cross validation score
+
+    References:
+    [1] http://www.ms.k.u-tokyo.ac.jp/software.html#LSMI
+
     """
 
     np.random.seed(random_seed)
@@ -106,7 +110,7 @@ def lsmi1D(X:np.ndarray,
     # Solve the objective equation
     theta = np.linalg.solve(H, h) # [C x 1]
 
-    # TODO: Use coordinate descent or other solver to solve the above equation
+    # TODO: Use coordinate descent or any gradient-based solver to solve the above equation
 
     SMI = 0.5 * (h.T @ theta) - 0.5
     return SMI, score_cv

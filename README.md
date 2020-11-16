@@ -1,10 +1,29 @@
 MISSO
 
-- [ ] Use gradient-based solvers 
+
+### Installation
+```
+
+```
+
+### Usage
+
+### Benchmarks
+
+
+### TODO
+- [ ] Try gradient-based solvers 
+    - [ ] Conjugate-gradient descent
 - [x] Multi-processing for `lsmi` computation
-- [ ] Multiprocessing benchmarks
-- [ ] Detailed comparison with graphical Lasso 
+- [ ] Benchmarks
+    - [ ] Multiprocessing
+    - [ ] GPU benchmarks
+    - [ ] Solver Benchmarks
+- [ ] Detailed comparison with graphical Lasso (Tutorials)
     - [ ] Toy Example
-    - [ ] Real-world Example
+    - [ ] Time Series: Stationary & Dynamic [link](https://watermark.silverchair.com/bhs352.pdf)
+    - [ ] Comparison of MISSO and GLASSO on indirect coupling [link](https://watermark.silverchair.com/btr638.pdf)
 - [ ] Use Cupy for solving 
 - [ ] tqdm for Notebook and Script
+- [ ] Readme
+
