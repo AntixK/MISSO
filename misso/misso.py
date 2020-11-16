@@ -1,4 +1,6 @@
 import os
+import shutil
+import joblib
 import numpy as np
 from graphviz import Graph
 import matplotlib.pyplot as plt
@@ -8,11 +10,9 @@ import logging
 from contextlib import closing
 
 from tqdm import tqdm
-import multiprocessing
-from multiprocessing import Pool
-from multiprocessing import sharedctypes
+from joblib import Parallel, delayed
 
-from .lsmi import lsmi1D
+from lsmi import lsmi1D
 
 class MISSO:
     def __init__(self,
@@ -29,6 +29,8 @@ class MISSO:
         :param alpha: L2 regularizer weight for the LSMI
         :param verbose: Boolean to display computation progress
         :param random_seed: Integer seed for reproducibility (default: 42)
+        :param mp: Boolean to use multiprocessing. If `None`, will use multprocessing is the
+                   current device has multiple cores.
         """
         self.num_centers = num_centers
         self.rbf_sigma = rbf_sigma
@@ -39,13 +41,17 @@ class MISSO:
         else:
             self.use_mp = mp
 
+        if self.use_mp:
+            self.folder = "./joblib_memmap"
+
         self.verbose = verbose
 
         if self.verbose:
             if self.use_mp:
-                self.logger = multiprocessing.log_to_stderr()
+                self.logger = logging.getLogger()
                 self.logger.setLevel(logging.INFO)
-                self.info = multiprocessing.get_logger().info
+                self.info = logging.info
+
             else:
                 self.logger = logging.getLogger()
                 self.logger.setLevel(logging.INFO)
@@ -54,34 +60,18 @@ class MISSO:
         np.random.seed(random_seed)
         self.random_seed = random_seed
 
-    def compute_smi(self, args):
-        x,y, i, j = args
-
+    def compute_smi(self, *args):
+        mim, x, y, i, j = args
         if self.verbose:
             self.info(f"Computing SMI for [{i}, {j}]")
 
-        if self.use_mp:
-            # Get the local instance of the shared memory
-            # Note that we don't need lock here as the
-            # parts accessed by each process are independent
-
-            local_mim = np.ctypeslib.as_array(shared_MIM)
-
-            smi, _ = lsmi1D(x, y,
-                            num_centers=self.num_centers,
-                            rbf_sigma=self.rbf_sigma,
-                            alpha=self.alpha,
-                            random_seed = self.random_seed)
-            local_mim[i, j] = smi
-            local_mim[j, i] = smi
-        else:
-            smi, _ = lsmi1D(x, y,
-                            num_centers=self.num_centers,
-                            rbf_sigma=self.rbf_sigma,
-                            alpha=self.alpha,
-                            random_seed = self.random_seed)
-            self.MIM[i, j] = smi
-            self.MIM[j, i] = smi  # MI is symmetric
+        smi, _ = lsmi1D(x, y,
+                        num_centers=self.num_centers,
+                        rbf_sigma=self.rbf_sigma,
+                        alpha=self.alpha,
+                        random_seed = self.random_seed)
+        mim[i, j] = smi
+        mim[j, i] = smi
 
         if self.verbose:
             self.info(f"Finished SMI for [{i}, {i}]")
@@ -111,21 +101,19 @@ class MISSO:
                         for i in range(N) for j in range(i + 1)]
 
         if self.use_mp: # Multiprocessing Code
-            MIM = np.ctypeslib.as_ctypes(np.zeros((N, N)))
-            shared_MIM = sharedctypes.RawArray(MIM._type_, MIM)
+            os.makedirs(self.folder, exist_ok=True)
+            shared_mimfile = os.path.join(self.folder, 'mim_memmap')
+            shared_mim = np.memmap(shared_mimfile, dtype=np.float, shape=(N,N), mode='w+')
 
-            with closing(Pool(processes=os.cpu_count(),
-                              initializer=init_shared_data,
-                              initargs=(shared_MIM,))) as p:
-                if self.verbose:
-                    p.map_async(self.compute_smi, process_args)
-                else:
-                    with tqdm(total=len(process_args), desc="Computing MIM") as pbar:
-                        for i, _ in enumerate(p.imap_unordered(self.compute_smi, process_args)):
-                            pbar.update()
-            p.join()
-            MIM = np.ctypeslib.as_array(shared_MIM)
-            self.MIM = MIM
+            if not self.verbose:
+                Parallel(n_jobs = os.cpu_count())(
+                                delayed(self.compute_smi)(shared_mim, *p_arg) for p_arg in tqdm(process_args))
+            else:
+                Parallel(n_jobs=os.cpu_count())(
+                    delayed(self.compute_smi)(shared_mim, *p_arg) for p_arg in process_args)
+
+            self.MIM = np.array(shared_mim)
+            shutil.rmtree(self.folder)
 
         else: # Sequential Processing
             self.MIM = np.zeros((N, N))
@@ -136,7 +124,7 @@ class MISSO:
                 pbar = tqdm(process_args, desc = 'Computing MIM')
 
             for args in pbar:
-                self.compute_smi(args)
+                self.compute_smi(self.MIM, *args)
 
         return self.MIM
 
@@ -169,40 +157,28 @@ class MISSO:
         plt.grid(False)
         plt.show()
 
-def init_shared_data(shared_array):
-    """
-    Multiprocessing requires the shared memory to be
-    inherited and not passed. This is the simplest and most
-    elegant way I could come up with.
-
-    :param shared_array: The array to be shared across the processes
-    :return: A global instance of the array
-    """
-    global shared_MIM
-    shared_MIM = shared_array
 
 if __name__ == '__main__':
-    # import matplotlib.pyplot as plt
     from time import time
     # plt.style.use('ggplot')
 
     np.set_printoptions(precision=2)
-    t = np.random.uniform(-10, 10, (100, 1))
+    t = np.random.uniform(-10, 10, (500, 1))
     #
     y = np.sin(t/10 * np.pi)
     X = y
 
     y = np.cos(t / 10 * np.pi)
     X = np.hstack([X, y])
-    y = np.random.uniform(-1, 1, (100, 1))
+    y = np.random.uniform(-1, 1, (500, 1))
     X = np.hstack([X, y])
     y = np.sin(t/10 * np.pi + 2 * np.pi / 3.)
     X = np.hstack([X, y])
     y = np.cos(t / 10 * np.pi - 2 * np.pi / 3.)
     X = np.hstack([X, y])
-    # X = np.hstack([X, y])
-    # X = np.hstack([X, y])
-    # X = np.hstack([X, y])
+    X = np.hstack([X, y])
+    X = np.hstack([X, y])
+    X = np.hstack([X, y])
     # X = np.hstack([X, y])
     # X = np.hstack([X, y])
     # X = np.hstack([X, y])
@@ -226,16 +202,17 @@ if __name__ == '__main__':
 
     print(X.shape)
 
-    # g = MISSO(verbose=False, mp=False)
-    # s = time()
-    # m_s = g.fit(X)
-    # print(f"Elapsed time: {time() - s}")
+    g = MISSO(verbose=False, mp=False)
+    s = time()
+    m_s = g.fit(X)
+    print(f"Elapsed time: {time() - s}")
 
 
     g = MISSO(verbose=False, mp=True)
     s = time()
     m_p = g.fit(X)
     print(f"Elapsed time: {time() - s}")
+    print(np.allclose(m_s, m_p))
 
 #
 #     g.show_matrix(m, xlabels = [r'$sin(\pi t/10)$',
