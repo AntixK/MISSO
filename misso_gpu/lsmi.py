@@ -1,4 +1,5 @@
-import numpy as np
+import cupy as np
+# import numpy as np
 from tqdm import tqdm
 from typing import Optional, Tuple
 
@@ -38,13 +39,13 @@ def lsmi1D(X:np.ndarray,
 
     num_centers = min(num_centers, M)
 
+    #
     # Randomly choose the centres for Gaussian Kernels
     centers = np.random.choice(M, size=num_centers, replace=False)
     X_norm = np.sum(X**2, axis=-1) # [C,]
     Y_norm = np.sum(Y**2, axis=-1) # [C,]
 
     # Compute the norm with respect to the centers
-
     X_dist = np.tile(X_norm, (num_centers, 1)) + \
              np.tile(X_norm[None, centers].T, (1, M)) - \
              2 * X[centers, :] @ X.T       # [C x M]
@@ -92,15 +93,16 @@ def lsmi1D(X:np.ndarray,
                 H_cv_tr = np.sum(np.array(H_cv_xphi)[fold_inds!=i], axis=0) *\
                           np.sum(np.array(H_cv_yphi)[fold_inds!=i], axis=0) \
                           / np.sum(n_cv[fold_inds!=i]**2)
-                H_cv_te = H_cv_xphi[i]* H_cv_yphi[i] / (n_cv[i]**2)
+                H_cv_te = H_cv_xphi[int(i)]* H_cv_yphi[int(i)] / (n_cv[int(i)]**2)
                 h_cv_tr = np.mean(np.array(h_cv)[fold_inds != i], axis = 0).reshape(-1,1) / np.sum(n_cv[fold_inds != i])
-                h_cv_te = h_cv[i].reshape(-1,1) / n_cv[i]
+                h_cv_te = h_cv[int(i)].reshape(-1,1) / n_cv[int(i)]
 
                 for j, alpha in enumerate(alpha_pool):
                     H_cv_tr += alpha * np.eye(num_centers)
                     theta_cv = np.linalg.solve(H_cv_tr, h_cv_tr)
                     wh_cv = 0.5*(theta_cv.T @ H_cv_te @ theta_cv) - h_cv_te.T @ theta_cv
-                    scores_cv[n,j] = scores_cv[n,j] + wh_cv/num_fold
+                    # print((wh_cv/num_fold).shape)
+                    scores_cv[n,j] = scores_cv[n,j] + (wh_cv/num_fold).item()
 
         sigma_ind, alpha_ind = np.unravel_index(np.argmin(scores_cv, axis=None), scores_cv.shape)
         score_cv = scores_cv[sigma_ind, alpha_ind]

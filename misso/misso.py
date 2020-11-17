@@ -12,7 +12,7 @@ from contextlib import closing
 from tqdm import tqdm
 from joblib import Parallel, delayed
 
-from lsmi import lsmi1D
+from .lsmi import lsmi1D
 
 class MISSO:
     def __init__(self,

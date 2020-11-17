@@ -1,5 +1,6 @@
 import os
-import numpy as np
+import cupy as np
+# import numpy as np
 from graphviz import Graph
 import matplotlib.pyplot as plt
 from typing import Optional, List
@@ -12,7 +13,7 @@ import multiprocessing
 from multiprocessing import Pool
 from multiprocessing import sharedctypes
 
-from lsmi import lsmi1D
+from .lsmi import lsmi1D
 
 class MISSO:
     def __init__(self,
@@ -21,7 +22,8 @@ class MISSO:
                  alpha: Optional[float] =  None,
                  verbose:bool = False,
                  random_seed:int = 42,
-                 mp:bool = None) -> None:
+                 mp:bool = None,
+                 device:str=None) -> None:
         """
 
         :param num_centers: Number of centers to use when computing the RBF kernel
@@ -33,6 +35,8 @@ class MISSO:
         self.num_centers = num_centers
         self.rbf_sigma = rbf_sigma
         self.alpha = alpha
+
+        self.device = device
 
         if mp is None:
             self.use_mp = os.cpu_count() >= 4
@@ -82,8 +86,8 @@ class MISSO:
                             alpha=self.alpha,
                             random_seed = self.random_seed,
                             verbose=self.verbose)
-            self.MIM[i, j] = smi
-            self.MIM[j, i] = smi  # MI is symmetric
+            self.MIM[i, j] = smi.item()
+            self.MIM[j, i] = smi.item()  # MI is symmetric
 
         if self.verbose:
             self.info(f"Finished SMI for [{i}, {i}]")
@@ -109,6 +113,10 @@ class MISSO:
         assert N == Ny, "Both X & Y must have the same # of random variables (dim 2)"
 
         self.N = N
+
+        with np.cuda.Device(0):
+            X = np.asarray(X)
+            Y = np.asarray(Y)
         process_args = [(X[:, i].reshape(-1, 1), Y[:, j].reshape(-1, 1), i, j)
                         for i in range(N) for j in range(i + 1)]
 
@@ -139,7 +147,7 @@ class MISSO:
 
             for args in pbar:
                 self.compute_smi(args)
-
+        self.MIM = np.asnumpy(self.MIM)
         return self.MIM
 
     def show_graph(self, M:np.ndarray, threshold:float, node_labels:List, title:str) -> Graph:
@@ -188,20 +196,21 @@ if __name__ == '__main__':
     from time import time
     # plt.style.use('ggplot')
 
-    np.set_printoptions(precision=2)
-    t = np.random.uniform(-10, 10, (100, 1))
+    # np.set_printoptions(precision=2)
+    import numpy as n
+    t = n.random.uniform(-10, 10, (800, 1))
     #
-    y = np.sin(t/10 * np.pi)
+    y = n.sin(t/10 * np.pi)
     X = y
 
-    y = np.cos(t / 10 * np.pi)
-    X = np.hstack([X, y])
-    y = np.random.uniform(-1, 1, (100, 1))
-    X = np.hstack([X, y])
-    y = np.sin(t/10 * np.pi + 2 * np.pi / 3.)
-    X = np.hstack([X, y])
-    y = np.cos(t / 10 * np.pi - 2 * np.pi / 3.)
-    X = np.hstack([X, y])
+    y = n.cos(t / 10 * np.pi)
+    X = n.hstack([X, y])
+    y = n.random.uniform(-1, 1, (800, 1))
+    X = n.hstack([X, y])
+    y = n.sin(t/10 * np.pi + 2 * np.pi / 3.)
+    X = n.hstack([X, y])
+    y = n.cos(t / 10 * np.pi - 2 * np.pi / 3.)
+    X = n.hstack([X, y])
     # X = np.hstack([X, y])
     # X = np.hstack([X, y])
     # X = np.hstack([X, y])
@@ -235,7 +244,7 @@ if __name__ == '__main__':
 
 
     # g = MISSO(verbose=True, mp=False)
-    g = MISSO(verbose=True, mp=True)
+    g = MISSO(verbose=False, mp=False)
     s = time()
     m_p = g.fit(X)
     print(f"Elapsed time: {time() - s}")
