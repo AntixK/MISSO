@@ -107,7 +107,7 @@ class MISSO:
 
             if not self.verbose:
                 Parallel(n_jobs = os.cpu_count())(
-                                delayed(self.compute_smi)(shared_mim, *p_arg) for p_arg in tqdm(process_args))
+                                delayed(self.compute_smi)(shared_mim, *p_arg) for p_arg in tqdm(process_args, desc='Computing MIM'))
             else:
                 Parallel(n_jobs=os.cpu_count())(
                     delayed(self.compute_smi)(shared_mim, *p_arg) for p_arg in process_args)

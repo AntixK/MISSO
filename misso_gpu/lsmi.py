@@ -1,6 +1,5 @@
 import cupy as np
 # import numpy as np
-from tqdm import tqdm
 from typing import Optional, Tuple
 
 def lsmi1D(X:np.ndarray,

@@ -1,6 +1,8 @@
+import sys
+sys.path.append('../')
 from time import time
 import numpy as np
-from misso import MISSO as misso_cpu
+# from misso import MISSO as misso_cpu
 from misso_gpu import MISSO as misso_gpu
 import matplotlib.pyplot as plt
 plt.style.use('seaborn')
@@ -25,14 +27,13 @@ def get_data(N, M:int = 5):
         X = np.hstack([X, y])
     return X
 
-cpu_time, gpu_time = [], []
-sizes = [100, 500, 1000, 1500, 2000, 3000, 4000, 6000]
+def run():
+    X = get_data(1500)
+    print(X.shape)
+    g = misso_gpu(verbose=False, mp=False)
+    g.fit(X)
 
-X = get_data(1500)
-print(X.shape)
-g = misso_gpu(verbose=False, mp=False)
-
-cProfile.run("g.fit(X)")
+cProfile.run("run()")
 
 
 
