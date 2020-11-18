@@ -4,7 +4,7 @@ MISSO
 ### Installation
  - Using `pip`
 ```
-
+pip install misso
 ```
 **Note:** In our benchmarks, multi-core version was always faster than the GPU accelerated version. So, we
 highly recommend installing just the CPU version and using multi-core computation.
@@ -13,7 +13,14 @@ highly recommend installing just the CPU version and using multi-core computatio
 ```
 
 ```
+
 ### Usage
+```
+from misso import MISSO
+
+
+```
+For a more detailed usage, check out the Tutorials folder.
 
 ### Benchmarks
 
@@ -33,8 +40,10 @@ Graphics:  Card-1: Intel Device 3e9b bus-ID: 00:02.0
            OpenGL: renderer: GeForce RTX 2070 with Max-Q Design/PCIe/SSE2
            version: 4.6.0 NVIDIA 440.100 Direct Render: Yes
 ```
+
+### License
+
 ### TODO
-- [ ] Try L1 regularizer
 - [ ] Try gradient-based solvers 
     - [ ] Conjugate-gradient descent
 - [x] Multi-processing for `lsmi` computation
@@ -47,17 +56,17 @@ Graphics:  Card-1: Intel Device 3e9b bus-ID: 00:02.0
     - [ ] Run benchmarks on multiple machines and put in benchmark reports
 - [ ] Detailed comparison with graphical Lasso (Tutorials)
     - [ ] Toy Example
-    - [ ] Time Series: Stationary & Dynamic [link](https://watermark.silverchair.com/bhs352.pdf)
-    - [ ] Comparison of MISSO and GLASSO on indirect coupling [link](https://watermark.silverchair.com/btr638.pdf)
+    - [ ] Time Series: Stationary & Dynamic [link](https://academic.oup.com/cercor/article-pdf/24/3/663/14099596/bhs352.pdf)
+    - [ ] Comparison of MISSO and GLASSO on indirect coupling [link](https://academic.oup.com/bioinformatics/article-pdf/28/2/184/16908913/btr638.pdf)
 - [ ] GPU Acceleration    
     - [x] Use Cupy for solving
-    - [ ] Reduce GPU overhead 
-    - [ ] Verify correctness
-- [ ] tqdm for Notebook and Script
+    - [x] Reduce GPU overhead 
+    - [ ] Verify correctness (Still an issue)
+    - [x] Try torch for GPU acceleration
+- [x] tqdm for Notebook and Script
 - [ ] Pandas DataFrame support
 - [ ] Packaging
-    - [ ] pip package
+    - [x] pip package
     - [ ] Travis CI
-    - [ ] Automatically detect and install GPU version
 - [ ] Readme
 

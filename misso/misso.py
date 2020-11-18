@@ -1,14 +1,15 @@
+"""
+Copyright (c) 2020, Anand K Subramanian.
+All rights reserved.
+"""
 import os
 import shutil
-import joblib
 import numpy as np
 from graphviz import Graph
 import matplotlib.pyplot as plt
 from typing import Optional, List
 
 import logging
-from contextlib import closing
-
 from tqdm import tqdm
 from joblib import Parallel, delayed
 
@@ -128,7 +129,19 @@ class MISSO:
 
         return self.MIM
 
-    def show_graph(self, M:np.ndarray, threshold:float, node_labels:List, title:str) -> Graph:
+    def show_graph(self,
+                   M:np.ndarray,
+                   threshold:float,
+                   node_labels:List,
+                   title:str) -> Graph:
+        """
+
+        :param M:
+        :param threshold:
+        :param node_labels:
+        :param title:
+        :return:
+        """
 
         g = Graph('G', filename=title+'.gv', engine='dot')
         M = np.round(M, 3)
@@ -139,7 +152,17 @@ class MISSO:
 
         return g
 
-    def show_matrix(self, M:np.ndarray, xlabels: List, ylabels: List = None):
+    def show_matrix(self,
+                    M:np.ndarray,
+                    xlabels: List,
+                    ylabels: List = None):
+        """
+
+        :param M:
+        :param xlabels:
+        :param ylabels:
+        :return:
+        """
 
         if ylabels is None:
             ylabels = xlabels
@@ -156,69 +179,3 @@ class MISSO:
                 ax.text(i, j, str(c), va='center', ha='center')
         plt.grid(False)
         plt.show()
-
-
-if __name__ == '__main__':
-    from time import time
-    # plt.style.use('ggplot')
-
-    np.set_printoptions(precision=2)
-    t = np.random.uniform(-10, 10, (500, 1))
-    #
-    y = np.sin(t/10 * np.pi)
-    X = y
-
-    y = np.cos(t / 10 * np.pi)
-    X = np.hstack([X, y])
-    y = np.random.uniform(-1, 1, (500, 1))
-    X = np.hstack([X, y])
-    y = np.sin(t/10 * np.pi + 2 * np.pi / 3.)
-    X = np.hstack([X, y])
-    y = np.cos(t / 10 * np.pi - 2 * np.pi / 3.)
-    X = np.hstack([X, y])
-    X = np.hstack([X, y])
-    X = np.hstack([X, y])
-    X = np.hstack([X, y])
-    # X = np.hstack([X, y])
-    # X = np.hstack([X, y])
-    # X = np.hstack([X, y])
-    # X = np.hstack([X, y])
-    # X = np.hstack([X, y])
-    # X = np.hstack([X, y])
-    # X = np.hstack([X, y])
-    # X = np.hstack([X, y])
-    # X = np.hstack([X, y])
-    # X = np.hstack([X, y])
-    # X = np.hstack([X, y])
-    # X = np.hstack([X, y])
-    # X = np.hstack([X, y])
-    # X = np.hstack([X, y])
-    # X = np.hstack([X, y])
-    # X = np.hstack([X, y])
-    # X = np.hstack([X, y])
-
-    # y = np.vstack([-np.ones((50, 1)), np.ones((50, 1))])
-    # X = np.hstack([X, y])
-
-    print(X.shape)
-
-    g = MISSO(verbose=False, mp=False)
-    s = time()
-    m_s = g.fit(X)
-    print(f"Elapsed time: {time() - s}")
-
-
-    g = MISSO(verbose=False, mp=True)
-    s = time()
-    m_p = g.fit(X)
-    print(f"Elapsed time: {time() - s}")
-    print(np.allclose(m_s, m_p))
-
-#
-#     g.show_matrix(m, xlabels = [r'$sin(\pi t/10)$',
-#                                  r'$Cos(\pi t/10)$',
-#                                  r'$U(0,1)$',
-#                                  r'$sin(\frac{\pi t}{10} + \frac{2\pi}{3})$',
-#                                  r'$cos(\frac{\pi t}{10} - \frac{2\pi}{3})$',
-#                                  r'Sign(t)'])
-

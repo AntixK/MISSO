@@ -1,3 +1,8 @@
+"""
+Copyright (c) 2020, Anand K Subramanian.
+All rights reserved.
+"""
+
 import numpy as np
 from typing import Optional, Tuple
 
@@ -12,9 +17,10 @@ def lsmi1D(X:np.ndarray,
     X and Y, each with M samples.
     :param X: [M, 1] Vector of samples
     :param Y: [M, 1] Vector of samples
-    :param num_centers: Number of centers to use when computing RBF kernel
+    :param num_centers: Number of centers to use when computing RBF kernel (**default:200*)
     :param rbf_sigma: Length-scale parameters for the RBF kernel
     :param alpha: L2 regularizer for the LSMI estimator
+    :param random_seed: Random seed (*default:42*)
     :return: A tuple of LSMI estimate and the cross validation score
 
     References:
@@ -114,12 +120,3 @@ def lsmi1D(X:np.ndarray,
 
     SMI = 0.5 * (h.T @ theta) - 0.5
     return SMI, score_cv
-
-if __name__ == '__main__':
-    # np.random.seed(2)
-    np.set_printoptions(precision=2)
-    x = np.random.uniform(-10, 10, (100, 1))
-    y = np.random.uniform(-1, 1, (100, 1))
-    # y = np.sin(x/10 * np.pi)
-
-    print(lsmi1D(x))
