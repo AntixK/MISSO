@@ -38,7 +38,7 @@ def lsmi1D(X:np.ndarray,
 
     num_centers = min(num_centers, M)
 
-    #
+
     # Randomly choose the centres for Gaussian Kernels
     centers = np.random.choice(M, size=num_centers, replace=False)
     X_norm = np.sum(X**2, axis=-1) # [C,]

@@ -1,0 +1,4 @@
+tqdm >= 4.45.0
+matplotlib
+graphviz >= 0.14.2
+torch >= 1.5

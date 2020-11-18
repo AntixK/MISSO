@@ -34,7 +34,6 @@ Graphics:  Card-1: Intel Device 3e9b bus-ID: 00:02.0
            version: 4.6.0 NVIDIA 440.100 Direct Render: Yes
 ```
 ### TODO
-- [ ] Try L1 regularizer
 - [ ] Try gradient-based solvers 
     - [ ] Conjugate-gradient descent
 - [x] Multi-processing for `lsmi` computation
@@ -53,7 +52,8 @@ Graphics:  Card-1: Intel Device 3e9b bus-ID: 00:02.0
     - [x] Use Cupy for solving
     - [ ] Reduce GPU overhead 
     - [ ] Verify correctness
-- [ ] tqdm for Notebook and Script
+    - [x] Check if pytorch is faster
+- [x] tqdm for Notebook and Script
 - [ ] Pandas DataFrame support
 - [ ] Packaging
     - [ ] pip package

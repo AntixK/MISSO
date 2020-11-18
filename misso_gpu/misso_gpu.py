@@ -23,7 +23,7 @@ class MISSO:
                  verbose:bool = False,
                  random_seed:int = 42,
                  mp:bool = None,
-                 device:str=None) -> None:
+                 device:str='gpu') -> None:
         """
 
         :param num_centers: Number of centers to use when computing the RBF kernel
@@ -64,33 +64,18 @@ class MISSO:
         if self.verbose:
             self.info(f"Computing SMI for [{i}, {j}]")
 
-        if self.use_mp:
-            # Get the local instance of the shared memory
-            # Note that we don't need lock here as the
-            # parts accessed by each process are independent
-
-            local_mim = np.ctypeslib.as_array(shared_MIM)
-
-            smi, _ = lsmi1D(x, y,
-                            num_centers=self.num_centers,
-                            rbf_sigma=self.rbf_sigma,
-                            alpha=self.alpha,
-                            random_seed = self.random_seed,
-                            verbose=self.verbose)
-            local_mim[i, j] = smi
-            local_mim[j, i] = smi
-        else:
-            smi, _ = lsmi1D(x, y,
-                            num_centers=self.num_centers,
-                            rbf_sigma=self.rbf_sigma,
-                            alpha=self.alpha,
-                            random_seed = self.random_seed,
-                            verbose=self.verbose)
-            self.MIM[i, j] = smi.item()
-            self.MIM[j, i] = smi.item()  # MI is symmetric
+        smi, _ = lsmi1D(x, y,
+                        num_centers=self.num_centers,
+                        rbf_sigma=self.rbf_sigma,
+                        alpha=self.alpha,
+                        random_seed = self.random_seed,
+                        verbose=self.verbose)
+        self.MIM[i, j] = smi.item()
+        self.MIM[j, i] = smi.item()  # MI is symmetric
 
         if self.verbose:
-            self.info(f"Finished SMI for [{i}, {i}]")
+            self.info(f"Finished SMI for [{i}, {j}]")
+
 
     def fit(self,
             X:np.ndarray,
@@ -114,39 +99,23 @@ class MISSO:
 
         self.N = N
 
-        with np.cuda.Device(0):
-            X = np.asarray(X)
-            Y = np.asarray(Y)
+        if self.device == "gpu":
+            with np.cuda.Device(0):
+                X = np.asarray(X)
+                Y = np.asarray(Y)
+
         process_args = [(X[:, i].reshape(-1, 1), Y[:, j].reshape(-1, 1), i, j)
                         for i in range(N) for j in range(i + 1)]
 
-        if self.use_mp: # Multiprocessing Code
-            MIM = np.ctypeslib.as_ctypes(np.zeros((N, N)))
-            shared_MIM = sharedctypes.RawArray(MIM._type_, MIM)
+        self.MIM = np.zeros((N, N))
 
-            with closing(Pool(processes=os.cpu_count(),
-                              initializer=init_shared_data,
-                              initargs=(shared_MIM,))) as p:
-                if self.verbose:
-                    p.map_async(self.compute_smi, process_args)
-                else:
-                    with tqdm(total=len(process_args), desc="Computing MIM") as pbar:
-                        for i, _ in enumerate(p.imap_unordered(self.compute_smi, process_args)):
-                            pbar.update()
-            p.join()
-            MIM = np.ctypeslib.as_array(shared_MIM)
-            self.MIM = MIM
+        if self.verbose:
+            pbar = process_args
+        else:
+            pbar = tqdm(process_args, desc = 'Computing MIM')
 
-        else: # Sequential Processing
-            self.MIM = np.zeros((N, N))
-
-            if self.verbose:
-                pbar = process_args
-            else:
-                pbar = tqdm(process_args, desc = 'Computing MIM')
-
-            for args in pbar:
-                self.compute_smi(args)
+        for args in pbar:
+            self.compute_smi(args)
         self.MIM = np.asnumpy(self.MIM)
         return self.MIM
 
