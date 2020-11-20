@@ -24,28 +24,22 @@ For a more detailed usage, check out the Tutorials folder.
 
 ### Benchmarks
 
-** Benchmarks were run on a machine with the following configuration
-```
-CPU:       6 core Intel Core i7-8750H (-MT-MCP-) [12 core with Hyperthreading]
-           arch: Skylake rev.10 cache: 9216 KB
-           flags: (lm nx sse sse2 sse3 sse4_1 sse4_2 ssse3 vmx) bmips: 26399
-           clock speeds: max: 4100 MHz 1: 2479 MHz 2: 3013 MHz 3: 3211 MHz
-           4: 3098 MHz 5: 3362 MHz 6: 3769 MHz 7: 3082 MHz 8: 3290 MHz
-           9: 3090 MHz 10: 3141 MHz 11: 3055 MHz 12: 3650 MHz
-Graphics:  Card-1: Intel Device 3e9b bus-ID: 00:02.0
-           Card-2: NVIDIA Device 1f10 bus-ID: 01:00.0
-           Display Server: x11 (X.Org 1.19.6 )
-           drivers: modesetting,nvidia (unloaded: fbdev,vesa,nouveau)
-           Resolution: 3840x1600@59.99hz
-           OpenGL: renderer: GeForce RTX 2070 with Max-Q Design/PCIe/SSE2
-           version: 4.6.0 NVIDIA 440.100 Direct Render: Yes
-```
+|       **Benchmark Results**            |              **CPU**               |      **OS**                |
+|----------------------------------------|------------------------------------|----------------------------|
+|                                        |   `6 core Intel Core i7-8750H`     |   `Ubuntu 18.04`           |
+|                                        |   `4 core Intel Core i7-8569U`     |   `macOS Catalina 10.15.7` |
+|                                        |                                    |                            |
+
 
 ### License
+
+
+
 
 ### TODO
 - [ ] Try gradient-based solvers 
     - [ ] Conjugate-gradient descent
+- [ ] Make it compatible with Sklearn
 - [x] Multi-processing for `lsmi` computation
     - [x] Reduce interprocess overhead
     - [x] Try other methods to parallelize the code
@@ -54,8 +48,10 @@ Graphics:  Card-1: Intel Device 3e9b bus-ID: 00:02.0
     - [x] GPU benchmarks
     - [ ] Solver Benchmarks
     - [ ] Run benchmarks on multiple machines and put in benchmark reports
-- [ ] Detailed comparison with graphical Lasso (Tutorials)
-    - [ ] Toy Example
+- [ ] Tutorials
+    - [ ] Toy Example comaparing with GLASSO
+    - [ ] Comaprison with Partial Mutual Information planar graphs
+    - [ ] Iter-operability with sklearn and pandas in a notebook
     - [ ] Time Series: Stationary & Dynamic [link](https://academic.oup.com/cercor/article-pdf/24/3/663/14099596/bhs352.pdf)
     - [ ] Comparison of MISSO and GLASSO on indirect coupling [link](https://academic.oup.com/bioinformatics/article-pdf/28/2/184/16908913/btr638.pdf)
 - [ ] GPU Acceleration    
@@ -70,3 +66,10 @@ Graphics:  Card-1: Intel Device 3e9b bus-ID: 00:02.0
     - [ ] Travis CI
 - [ ] Readme
 
+### Extending to a full library
+- [ ] HSIC
+- [ ] PMI
+- [ ] CMI
+- [ ] Rename MISSO to MIM
+- [ ] l1-LSMI
+- [ ] LSIR
