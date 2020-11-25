@@ -41,7 +41,7 @@ For a more detailed usage, check out the Tutorials folder.
     - [ ] Conjugate-gradient descent
 - [ ] Make it compatible with Sklearn
 - [x] Multi-processing for `lsmi` computation
-    - [x] Reduce interprocess overhead
+    - [x] Reduce inter-process overhead
     - [x] Try other methods to parallelize the code
 - [ ] Benchmarks
     - [x] Multiprocessing
@@ -60,6 +60,7 @@ For a more detailed usage, check out the Tutorials folder.
     - [ ] Verify correctness (Still an issue)
     - [x] Try torch for GPU acceleration
 - [x] tqdm for Notebook and Script
+- [ ] Study the MST-based construction for the graph [link](https://arxiv.org/pdf/1703.00485.pdf)
 - [ ] Pandas DataFrame support
 - [ ] Packaging
     - [x] pip package
@@ -68,8 +69,15 @@ For a more detailed usage, check out the Tutorials folder.
 
 ### Extending to a full library
 - [ ] HSIC
-- [ ] PMI
-- [ ] CMI
+- [ ] Partial Correlation
+- [ ] [PMI](https://www.pnas.org/content/113/18/5130.short)
+- [ ] CMI 
+- [ ] Partial Mutual Information
 - [ ] Rename MISSO to MIM
 - [ ] l1-LSMI
 - [ ] LSIR
+- [ ] [PIDC](https://www.cell.com/cell-systems/pdfExtended/S2405-4712(17)30386-1) (Optional)
+
+
+### References
+- [https://github.com/dit/dit](https://github.com/dit/dit)
